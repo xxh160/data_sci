@@ -1,6 +1,9 @@
-.vscode
-.idea
+/**/.vscode
+/**/.idea
 
 /**/*.log
 
 /**/__pycache__/
+
+/tmp
+/etc
