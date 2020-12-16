@@ -1,0 +1,9 @@
+/**/.vscode
+/**/.idea
+
+/**/*.log
+
+/tmp
+/etc
+
+/**/__pycache__/
