@@ -72,8 +72,8 @@ def get_one(news_parser: NewsParser, url: str, res: list):
 
 def get_all():
     news_manager = NewsParser("https://weibo.com/login.php", ua1)
-    news_manager.login({'name': 18851863569,
-                        'passwd': 'datascience123',
+    news_manager.login({'name': '<your-login-name>',
+                        'passwd': '<your-password>',
                         'login_name_xpath': "//input[@id='loginname']",
                         'passwd_xpath': "//input[@type='password']",
                         'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"
