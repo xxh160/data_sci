@@ -23,7 +23,7 @@ class NewsParser:
         self._url = url
         self._driver = None
         self._cookies = {}
-        self._headers = {'User-Agent': user_agent}
+        self._headers = {'User-Agent': user_agent, "Connection": "close"}
 
     def reset(self, url):
         self._url = url
@@ -47,6 +47,10 @@ class NewsParser:
         driver.get(self._url)
         return driver
 
+    def close(self):
+        self._driver.quit()
+        self._driver = None
+
     def login(self, data: dict):
         if self._driver is None:
             self._driver = self._dynamic()
@@ -63,12 +67,12 @@ class NewsParser:
         # print([key + ": " + value for key, value in self.cookies.items()])
 
     def get_static_raw(self, url, encoding='utf-8'):
-        response = requests.get(url, headers=self._headers, cookies=self._cookies)
+        response = requests.get(url, headers=self._headers, cookies=self._cookies, verify=False)
         response.encoding = encoding
         return response.text
 
     def get_static(self, url, encoding='utf-8'):
-        response = requests.get(url, headers=self._headers, cookies=self._cookies)
+        response = requests.get(url, headers=self._headers, cookies=self._cookies, verify=False)
         response.encoding = encoding
         return etree.HTML(response.text)
 
@@ -104,13 +108,4 @@ class NewsParser:
 
 
 if __name__ == '__main__':
-    # news_manager = NewsParser("https://weibo.com/", ua1)
-    # news_manager.login(
-    #     {'name': 18851863569, 'passwd': 'datascience123', 'login_name_xpath': "//input[@id='loginname']",
-    #      'passwd_xpath': "//input[@type='password']",
-    #      'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"})
-    print(parse_cookies(
-        "SINAGLOBAL=6196500630125.1875.1603275403766; WBPSESS=D9XkFtGB_kQY1AaQKjY4KxF8mH5Qh2OJOM5Z_9fP_ibpoZV60Avg-_Ynp4AjRdhlxZ0tAZlZxuvGr3CH7PLY90SvYLx9NYbowJNwy3SpinBIoQbOMfMilBoozBBk3mDs; SCF=AsQMuAlPE5Vc3YP5BtiLD-n2MKWM-tft5wIzbqI2NM3sU2kiwd6i3c-uInFbnVlB6bamNeHu4r0ftWCAFE0EHbM.; login_sid_t=1a11784b5d2b27dfa353cd776f69babb; cross_origin_proto=SSL; _s_tentry=-; Apache=8077195610521.315.1608106986826; ULV=1608106986830:4:3:2:8077195610521.315.1608106986826:1608099195727; WBtopGlobal_register_version=91c79ed46b5606b9; UOR=,,www.google.com; wb_view_log=1280*8002; WBStorage=8daec78e6a891122|undefined; SUB=_2A25y3iuuDeRhGeFL6FcY9ybJyT-IHXVRqhpmrDV8PUNbmtAKLWimkW9NQjLCa1nMP2-ApBXuu8xF_TDpJybhI8kG; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW2OoyHMADPdokNfi51qOZR5JpX5KzhUgL.FoMfe0-4S0nfeoe2dJLoI0xuMCH8SEHFeb-R1CH81F-R1CHFebH8SCHWSFHWSEH8SE-RBEHWBbH8SE-RBEHWBo5E1Kef; ALF=1639681915; SSOLoginState=1608145916; wvr=6; wb_view_log_7535978523=1280*8002; webim_unReadCount=%7B%22time%22%3A1608146212814%2C%22dm_pub_total%22%3A2%2C%22chat_group_client%22%3A0%2C%22chat_group_notice%22%3A0%2C%22allcountNum%22%3A2%2C%22msgbox%22%3A0%7D"))
-    # with open("./debug.log", 'w') as f:
-    #     f.write(str(parse_cookies(
-    #         "SINAGLOBAL=6196500630125.1875.1603275403766; WBPSESS=D9XkFtGB_kQY1AaQKjY4KxF8mH5Qh2OJOM5Z_9fP_ibpoZV60Avg-_Ynp4AjRdhlxZ0tAZlZxuvGr3CH7PLY90SvYLx9NYbowJNwy3SpinBIoQbOMfMilBoozBBk3mDs; SCF=AsQMuAlPE5Vc3YP5BtiLD-n2MKWM-tft5wIzbqI2NM3sU2kiwd6i3c-uInFbnVlB6bamNeHu4r0ftWCAFE0EHbM.; login_sid_t=1a11784b5d2b27dfa353cd776f69babb; cross_origin_proto=SSL; _s_tentry=-; Apache=8077195610521.315.1608106986826; ULV=1608106986830:4:3:2:8077195610521.315.1608106986826:1608099195727; WBtopGlobal_register_version=91c79ed46b5606b9; UOR=,,www.google.com; wb_view_log=1280*8002; WBStorage=8daec78e6a891122|undefined; SUB=_2A25y3iuuDeRhGeFL6FcY9ybJyT-IHXVRqhpmrDV8PUNbmtAKLWimkW9NQjLCa1nMP2-ApBXuu8xF_TDpJybhI8kG; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW2OoyHMADPdokNfi51qOZR5JpX5KzhUgL.FoMfe0-4S0nfeoe2dJLoI0xuMCH8SEHFeb-R1CH81F-R1CHFebH8SCHWSFHWSEH8SE-RBEHWBbH8SE-RBEHWBo5E1Kef; ALF=1639681915; SSOLoginState=1608145916; wvr=6; wb_view_log_7535978523=1280*8002; webim_unReadCount=%7B%22time%22%3A1608146212814%2C%22dm_pub_total%22%3A2%2C%22chat_group_client%22%3A0%2C%22chat_group_notice%22%3A0%2C%22allcountNum%22%3A2%2C%22msgbox%22%3A0%7D")))
+    static = """"""

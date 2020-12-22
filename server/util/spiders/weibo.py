@@ -1,9 +1,10 @@
 import json
 import re
+import time
 
 from lxml import etree
 
-from util.decorator import str_list_process
+from util.decorator import str_list_process, str_process
 from util.news_parser import NewsParser, ua1
 
 
@@ -29,15 +30,30 @@ def find_urls(news_parser, base_url, max_num):
             break
         cur_html = news_parser.get_static("https://s.weibo.com" + next[0])
         max_num -= 1
+        time.sleep(5)
     return res
 
 
-def get_topic(news_parser):
-    pass
+@str_process
+def get_topic(news_parser, url):
+    static_raw = news_parser.get_static_raw(url)
+    static = etree.HTML(static_raw)
+    return static.xpath('//head//title/text()')[0]
 
 
-def get_time(news_parser):
-    pass
+@str_process
+def get_time(news_parser, url):
+    static_raw = news_parser.get_static_raw(url)
+    static = etree.HTML(static_raw)
+    cur_list = static.xpath('//script/text()')
+    mid = []
+    for script in cur_list:
+        if "feed_list_item_date" in script:
+            mid = re.findall('.*(<a.*?feed_list_item_date.*?/a>).*', script[3000:7000])
+            break
+    next_html = etree.HTML(mid[0])
+    res_time = next_html.xpath("//a/text()")
+    return res_time[0]
 
 
 @str_list_process
@@ -61,19 +77,24 @@ def get_comments(news_parser, url):
 
 def get_one(news_parser: NewsParser, url: str, res: list):
     try:
-        cur_res = []
+        topic = get_topic(news_parser, url)
+        # time.sleep(2)
+        cur_time = get_time(news_parser, url)
+        # time.sleep(2)
         comments = get_comments(news_parser, url)
-        cur_res.append(comments)
-        res.append(cur_res)
+        # time.sleep(2)
+        res.extend([topic, cur_time, url, comments])
     except Exception as e:
         print(e.args)
         pass
 
 
 def get_all():
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     news_manager = NewsParser("https://weibo.com/login.php", ua1)
-    news_manager.login({'name': '<your-login-name>',
-                        'passwd': '<your-password>',
+    news_manager.login({'name': '18851863569',
+                        'passwd': 'science123date',
                         'login_name_xpath': "//input[@id='loginname']",
                         'passwd_xpath': "//input[@type='password']",
                         'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"
@@ -84,19 +105,21 @@ def get_all():
     # news_manager.get_dynamic_element("//a[@node-type='advsearch']").click()
 
     urls = find_urls(news_manager,
-                     "https://s.weibo.com/weibo?q=%E6%96%B0%E5%86%A0%E7%96%AB%E6%83%85&xsort=hot&suball=1&timescope=custom:2020-01-31:2020-12-01&Refer=g",
-                     1)
+                     "https://s.weibo.com/weibo/%25E7%25A5%259E%25E5%25A5%2587%25E5%25A5%25B3%25E4%25BE%25A01984%25E4%25B8%25AD%25E5%259B%25BD%25E9%25A6%2596%25E6%2598%25A0%25E7%25A4%25BC?q=%E6%96%B0%E5%86%A0%E7%96%AB%E6%83%85&xsort=hot&suball=1&timescope=custom:2020-02-01:2020-11-30&Refer=g"
+                     , 1)
     last_res = []
     # return NewsParser.run(get_one, urls)
     for url in urls:
         res = []
         get_one(news_manager, url, res)
         last_res.append(res)
+    news_manager.close()
     return last_res
 
 
 if __name__ == '__main__':
     final_res = get_all()
     for cur in final_res:
-        for comment in cur[-1]:
+        print(cur[0], cur[1], cur[2])
+        for comment in cur[3]:
             print(comment)
