@@ -1,11 +1,21 @@
 from functools import wraps
 
 
+def remove_sign(tar, sign):
+    res = ''
+    for cur_char in tar:
+        if cur_char != sign:
+            res += cur_char
+    return res
+
+
 def single_str_process(string):
     res = ''
     for char in string:
         char = ''.join(char.split())
         res += char
+    if len(res) > 0 and res[0] == '：':
+        res = res[1:]
     return res
 
 
