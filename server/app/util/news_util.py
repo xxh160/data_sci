@@ -1,5 +1,7 @@
+import queue
+import threading
 import time
-from threading import Thread
+from queue import Queue
 
 import requests
 from lxml import etree
@@ -17,6 +19,22 @@ def parse_cookies(cookie_str):
     return res
 
 
+class Task(threading.Thread):
+    def __init__(self, q: Queue, func):
+        threading.Thread.__init__(self)
+        self.q = q
+        self.func = func
+
+    def run(self) -> None:
+        while True:
+            try:
+                cur_url = self.q.get(block=True, timeout=1)
+            except queue.Empty:
+                break
+            self.func(url=cur_url)
+            self.q.task_done()
+
+
 class NewsParser:
     def __init__(self, url, user_agent):
         """url最好是顶级域名"""
@@ -24,6 +42,17 @@ class NewsParser:
         self._driver = None
         self._cookies = {}
         self._headers = {'User-Agent': user_agent, "Connection": "close"}
+
+    @staticmethod
+    def run(func, urls: Queue):
+        """需要一个接受news_parser, url 和 res 列表为参数的func"""
+        start = time.time()
+        for i in range(4):
+            cur_task = Task(urls, func)
+            cur_task.start()
+        urls.join()
+        end = time.time()
+        print("time: " + str(end - start))
 
     def reset(self, url):
         self._url = url
@@ -90,21 +119,6 @@ class NewsParser:
         if self._driver is None:
             self._driver = self._dynamic()
         return self._driver.find_element_by_xpath(xpath)
-
-    @staticmethod
-    def run(func, url_list, ua=ua1):
-        """需要一个接受news, url 和 res 列表为参数的func"""
-        result = []
-        threads = []
-        for cur_url in url_list:
-            news_parser = NewsParser(cur_url, ua)
-            t = Thread(target=func, args=(news_parser, cur_url, result))
-            threads.append(t)
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        return result
 
 
 if __name__ == '__main__':
