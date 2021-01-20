@@ -37,7 +37,6 @@ class Task(threading.Thread):
 
 class NewsParser:
     def __init__(self, url, user_agent):
-        """url最好是顶级域名"""
         self._url = url
         self._driver = None
         self._cookies = {}
@@ -45,7 +44,6 @@ class NewsParser:
 
     @staticmethod
     def run(func, urls: Queue):
-        """需要一个接受news_parser, url 和 res 列表为参数的func"""
         start = time.time()
         for i in range(4):
             cur_task = Task(urls, func)
@@ -93,7 +91,6 @@ class NewsParser:
         cookies_dict = self._driver.get_cookies()
         for cookie in cookies_dict:
             self._cookies[cookie['name']] = cookie['value']
-        # print([key + ": " + value for key, value in self.cookies.items()])
 
     def get_static_raw(self, url, encoding='utf-8'):
         response = requests.get(url, headers=self._headers, cookies=self._cookies, verify=False)
@@ -119,7 +116,3 @@ class NewsParser:
         if self._driver is None:
             self._driver = self._dynamic()
         return self._driver.find_element_by_xpath(xpath)
-
-
-if __name__ == '__main__':
-    static = """"""

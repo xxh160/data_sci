@@ -6,7 +6,7 @@ from queue import Queue
 
 from lxml import etree
 
-from app.util.news_util import NewsParser, ua1
+from app.spider.news_parser import NewsParser, ua1
 from app.util.str_util import str_list_process, str_process, remove_sign
 
 
