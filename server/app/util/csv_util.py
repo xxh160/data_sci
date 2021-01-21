@@ -32,7 +32,7 @@ def read_comments(name: str, path: str) -> DataFrame:
 
 def read_num(name: str, path: str) -> DataFrame:
     final_path = _full_path(name, path)
-    res = pd.read_csv(final_path, header=None, names=["weibo", "bili", "people", "south"], sep=",")
+    res = pd.read_csv(final_path, header=None, names=["weibo", "bili", "people", "south", "comments"], sep=",")
     return res
 
 
@@ -50,10 +50,16 @@ def write_comments(name: str, path: str, data: list):
 
 def write_nums(name: str, path: str, data: list):
     final_path = _full_path(name, path)
-    df = pd.DataFrame(data, columns=["weibo", "bili", "people", "south"])
+    df = pd.DataFrame([data], columns=["weibo", "bili", "people", "south", "comments"])
     _write_helper(final_path, df)
 
 
+def rewrite_nums(name: str, path: str, data: list):
+    final_path = _full_path(name, path)
+    df = pd.DataFrame([data], columns=["weibo", "bili", "people", "south", "comments"])
+    df.to_csv(final_path, index=False, mode="w", header=False, sep=",")
+
+
 if __name__ == '__main__':
-    print(read_num("cur_num", "../scraper/store/"))
-    write_normal("test", "../scraper/store/", [["a", "b", "c", "d"]])
+    print(read_num("test", "../scraper/store/"))
+    rewrite_nums("test", "../scraper/store/", ["a", "b", "c", "d", "e"])
