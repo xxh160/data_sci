@@ -26,3 +26,7 @@
 - [`pretreatment`](doc/pretreatement.md)
 - [`analysis`](doc/analysis.md)
 - [`interface`](doc/interface.md)
+
+## 会议记录
+
+-[`2020-1-20`](doc/minutes/2020-1-20.md)
