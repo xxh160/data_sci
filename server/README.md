@@ -1,51 +1,28 @@
-# 数据科学大作业后端
+# 说明文档
 
-爬取天涯、观察者网和微博的疫情相关文章的评论，分析疫情下的大众心理，并通过机器学习做出预测。
+数据科学大作业后端文档
 
-## 项目进度
+## 总体架构
 
-- 12.16 创建flask项目框架 完成天涯爬虫（项目框架指一堆空文件夹；
-- 12.17 初步完成微博爬虫的爬取评论功能；
-- 12.23 完成微博爬虫的全部功能，整合数据库
+后端分为三大部分：
 
-## TODO:
+- `scraper`即数据获取模块；
+- `pretreatment`即数据预处理模块；
+- `analysis`即数据分析模块。
 
-- 12.13-12.20 完成项目框架的搭建，三个爬虫的整合，并开始进行数据分析；
+数据获取模块异步获取数据，放入其`store`文件夹下。
 
-## 爬虫包接口
+数据预处理模块异步从数据获取模块获取数据，将数据源从数据获取模块中删除，并把处理过后的数据放入其`store`文件夹下。
 
-`get_all()`返回一个列表，元素分别为文章/帖子/博文的主题、时间、url和评论，其中评论是列表形式。
+数据分析模块异步从数据预处理模块获取数据，将数据源从数据预处理模块中删除，并把处理过后的数据放入其`store`文件夹下。
 
-### usage
+其中，数据分析模块和前端进行交互，进行数据可视化。
 
-调用时导入`util.spiders.<name>`中的`get_all()`函数即可。
+具体描述见各自文档。
 
-微博的爬虫如果想调整一次性爬取的结果数量，请手动调整`urls = find_urls(news_manager, <url>, <max_num>)`中的`max_num`。
+## doc
 
-### config
-
-包依赖方面，建议直接一步到位：
-
-`conda install anaconda`
-
-> 什么？0202年了还有人没有用conda？不会吧不会吧？(x
-
-如果没有安装`conda`，或者不想安装那么多包，可以运行如下命令：
-
-`pip install -r requirements.txt`
-
-`conda install --yes --file requirements.txt`
-
-`conda`和`pip`自己选择。
-
-> 小声告诉你这个依赖列表是我本地直接导出的，和安装anaconda差不太多
-
-爬虫配置方面，天涯的可以直接调用；
-
-微博需要手动配置。配置方法如下：
-
-- 安装`selenium`包，并进行浏览器驱动下载配置，具体请`STFW`；
-- 手动修改`util/news_parser.py`中`NewsManager`的`_dynamic`方法中的浏览器驱动路径`executable_path`；
-- 手动修改`util/spiders/weibo.py`中`get_all()`函数中的`name`和`passwd`，将其替换为你自己的微博账号密码，并且下载微博手机客户端保证能够扫码验证。
-
-微博的爬虫目前为单线程。
+- [`scraper`](doc/scraper.md)
+- [`pretreatment`](doc/pretreatement.md)
+- [`analysis`](doc/analysis.md)
+- [`interface`](doc/interface.md)

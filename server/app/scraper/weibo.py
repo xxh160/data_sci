@@ -1,25 +1,31 @@
 import json
 import re
 import time
+from datetime import datetime
 from functools import partial
 from queue import Queue
 
 from lxml import etree
 
-from app.spider.news_parser import NewsParser, ua1
+from app.util.news_util import NewsParser, ua
 from app.util.str_util import str_list_process, str_process, remove_sign
+from app.util.yaml_util import read_yaml
 
 
-def get_all():
+def search(date: datetime, keywords: str) -> list:
+    tar_url = "https://s.weibo.com/weibo?q={0}&xsort=hot&suball=1&timescope=custom:{1}:{1}&Refer=g".format(keywords,
+                                                                                                           date.date())
     news_manager = login()
-    urls = find_urls(news_manager,
-                     "https://s.weibo.com/weibo/%25E7%25A5%259E%25E5%25A5%2587%25E5%25A5%25B3%25E4%25BE%25A01984%25E4%25B8%25AD%25E5%259B%25BD%25E9%25A6%2596%25E6%2598%25A0%25E7%25A4%25BC?q=%E6%96%B0%E5%86%A0%E7%96%AB%E6%83%85&xsort=hot&suball=1&timescope=custom:2020-02-01:2020-11-30&Refer=g"
-                     , 1)
+    urls = find_urls(news_manager, tar_url, 1)
     res_queue = Queue()
     part = partial(get_one, news_parser=news_manager, res=res_queue)
     NewsParser.run(part, urls)
     news_manager.close()
     return list(res_queue.queue)
+
+
+if __name__ == '__main__':
+    search(datetime.now(), "yi")
 
 
 def find_urls(news_parser, base_url, max_num) -> Queue:
@@ -88,11 +94,11 @@ def get_one(url: str, news_parser: NewsParser, res: Queue):
     try:
         topic = get_topic(news_parser, url)
         # time.sleep(2)
-        cur_time = get_time(news_parser, url)
+        # cur_time = get_time(news_parser, url)
         # time.sleep(2)
         comments = get_comments(news_parser, url)
         # time.sleep(2)
-        res.put([topic, cur_time, url, comments])
+        res.put({"topic": topic, "comments": comments, "url": url})
     except Exception as e:
         print(e.args)
         pass
@@ -102,19 +108,13 @@ def get_one(url: str, news_parser: NewsParser, res: Queue):
 def login():
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    news_manager = NewsParser("https://weibo.com/login.php", ua1)
-    news_manager.login({'name': '18851863569',
-                        'passwd': 'sci9scidatehhh14',
+    news_manager = NewsParser("https://weibo.com/login.php", ua)
+    # 相对路径是魔鬼啊
+    log = read_yaml("../../resource/log_config.yml")
+    news_manager.login({'name': log["weibo"]["name"],
+                        'passwd': log["weibo"]["password"],
                         'login_name_xpath': "//input[@id='loginname']",
                         'passwd_xpath': "//input[@type='password']",
                         'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"
                         })
     return news_manager
-
-
-if __name__ == '__main__':
-    final_res = get_all()
-    for cur in final_res:
-        print(cur[0], cur[1], cur[2])
-        for comment in cur[3]:
-            print(comment)

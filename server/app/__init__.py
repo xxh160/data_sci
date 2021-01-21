@@ -1,11 +1,10 @@
 from flask import Flask
 
-from app import config
-from app.db import db
+from app.analysis import analysis
 
-app = Flask(__name__)
-app.config.from_object(config)
-db.init_app(app)
 
-with app.app_context():
-    db.create_all()
+def create_app(config_object):
+    app = Flask(__name__)
+    app.config.from_object(config_object)
+    app.register_blueprint(analysis, url_prefix="/api/v1/analysis")
+    return app

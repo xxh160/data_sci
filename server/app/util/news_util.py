@@ -7,11 +7,11 @@ import requests
 from lxml import etree
 from selenium import webdriver
 
-ua1 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 ' \
-      'Safari/537.36 '
+ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 ' \
+     'Safari/537.36 '
 
 
-def parse_cookies(cookie_str):
+def _parse_cookies(cookie_str):
     res = {}
     for cookie in cookie_str.split(";"):
         key, value = cookie.split("=")
@@ -60,12 +60,6 @@ class NewsParser:
     def _dynamic(self):
         # 创建谷歌浏览器驱动参数对象
         chrome_options = webdriver.ChromeOptions()
-        # 不加载图片
-        # preferences = {"profile.managed_default_content_settings.images": 2}
-        # chrome_options.add_experimental_option("prefs", preferences)
-        # 使用headless无界面浏览器模式
-        # chrome_options.add_argument('--headless')
-        # chrome_options.add_argument('--disable-gpu')
         # 加载谷歌浏览器驱动
         driver = webdriver.Chrome(options=chrome_options, executable_path="D:\\browserDriver\\chromedriver.exe")
         # 隐式等待
