@@ -1,35 +1,33 @@
 import json
 import re
 import time
-from datetime import datetime
-from functools import partial
-from queue import Queue
+from datetime import datetime, date, timedelta
 
 from lxml import etree
+from pandas import DataFrame, Series
 
 from app.util.news_util import NewsParser, ua
 from app.util.str_util import str_list_process, str_process, remove_sign
 from app.util.yaml_util import read_yaml
 
 
-def search(date: datetime, keywords: str) -> list:
-    tar_url = "https://s.weibo.com/weibo?q={0}&xsort=hot&suball=1&timescope=custom:{1}:{1}&Refer=g".format(keywords,
-                                                                                                           date.date())
-    news_manager = login()
-    urls = find_urls(news_manager, tar_url, 1)
-    res_queue = Queue()
-    part = partial(get_one, news_parser=news_manager, res=res_queue)
-    NewsParser.run(part, urls)
-    news_manager.close()
-    return list(res_queue.queue)
+def login():
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    news_manager = NewsParser("https://weibo.com/login.php", ua)
+    # 相对路径是魔鬼啊
+    log = read_yaml("../../resource/log_config.yml")
+    news_manager.login({'name': log["weibo"]["name"],
+                        'passwd': log["weibo"]["password"],
+                        'login_name_xpath': "//input[@id='loginname']",
+                        'passwd_xpath': "//input[@type='password']",
+                        'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"
+                        })
+    return news_manager
 
 
-if __name__ == '__main__':
-    search(datetime.now(), "yi")
-
-
-def find_urls(news_parser, base_url, max_num) -> Queue:
-    res = Queue()
+def find_urls(news_parser, base_url, max_num) -> list:
+    res = []
     # html = news_parser.get_static(base_url)
     raw = news_parser.get_static_raw(base_url)
     html = etree.HTML(raw)
@@ -38,14 +36,15 @@ def find_urls(news_parser, base_url, max_num) -> Queue:
         cur_urls = cur_html.xpath("//a[@action-type='fl_unfold']/@href")
         # res.extend(["https:" + cur_url for cur_url in cur_urls])
         for cur_url in cur_urls:
-            res.put("https:" + cur_url)
+            res.append("https:" + cur_url)
         next_url = html.xpath("//a[@class='next']/@href")
         if len(next_url) == 0:
             break
         cur_html = news_parser.get_static("https://s.weibo.com" + next_url[0])
         max_num -= 1
         time.sleep(1)
-    return res
+    print("total: " + str(len(res)))
+    return list(set(res))
 
 
 @str_process
@@ -90,31 +89,69 @@ def get_comments(news_parser, url):
     return comments
 
 
-def get_one(url: str, news_parser: NewsParser, res: Queue):
+def get_one(url: str, news_parser: NewsParser):
+    res = []
     try:
-        topic = get_topic(news_parser, url)
-        # time.sleep(2)
-        # cur_time = get_time(news_parser, url)
-        # time.sleep(2)
-        comments = get_comments(news_parser, url)
-        # time.sleep(2)
-        res.put({"topic": topic, "comments": comments, "url": url})
+        res = all_comments(news_parser, url)
     except Exception as e:
         print(e.args)
-        pass
-    time.sleep(1)
+    return res
 
 
-def login():
-    import urllib3
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    news_manager = NewsParser("https://weibo.com/login.php", ua)
-    # 相对路径是魔鬼啊
-    log = read_yaml("../../resource/log_config.yml")
-    news_manager.login({'name': log["weibo"]["name"],
-                        'passwd': log["weibo"]["password"],
-                        'login_name_xpath': "//input[@id='loginname']",
-                        'passwd_xpath': "//input[@type='password']",
-                        'submit_xpath': "//a[@suda-data='key=tblog_weibologin3&value=click_sign']"
-                        })
-    return news_manager
+# @str_list_process
+def all_comments(news_parser: NewsParser, url) -> list:
+    news_parser.reset(url)
+    # scroll = "var q=document.getElementById('id').scrollTop=10000"
+    for i in range(4):
+        news_parser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(3)
+    news_parser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    for i in range(5):
+        try:
+            news_parser.click("//a[@action-type='click_more_comment']/span[@class='more_txt']")
+        except Exception as e:
+            print(e.args)
+            break
+        time.sleep(1)
+    comments_nodes = news_parser.get_dynamic_elements(
+        "//div[@class='list_li S_line1 clearfix']//div[@class='WB_text']")
+    comments = [cur.text for cur in comments_nodes if "等人" not in cur.text]
+    print(comments)
+    return comments
+
+
+def get_all(tar_date: date, keywords: str, news_manager: NewsParser) -> Series:
+    begin = time.time()
+    tar_url = "https://s.weibo.com/weibo?q={0}&xsort=hot&suball=1&timescope=custom:{1}:{1}&Refer=g".format(keywords,
+                                                                                                           tar_date)
+    urls = find_urls(news_manager, tar_url, 3)
+    res = []
+    for url in urls:
+        try:
+            res.extend(all_comments(news_manager, url))
+        except Exception:
+            pass
+    end = time.time()
+    print("time: " + str(end - begin))
+    print({str(date): res})
+    return Series(res)
+
+
+def run(begin: datetime, end: datetime, keywords: str):
+    news_manager = login()
+    begin_time = begin.date()
+    end_time = end.date()
+    while begin_time <= end_time:
+        print(begin_time)
+        cur_res = get_all(begin_time, keywords, news_manager)
+        df = DataFrame({begin_time: cur_res})
+        df.to_csv("./store/weibo/" + "weibo_" + str(begin_time) + ".csv")
+        begin_time += timedelta(days=1)
+    news_manager.close()
+
+
+if __name__ == '__main__':
+    # search(datetime(2020, 12, 31), datetime(2020, 12, 31), "新冠疫情")
+    print("1:2".split(":")[1])
+    tmp = ["1", "2", "1", 2]
+    print(list(set(tmp)))

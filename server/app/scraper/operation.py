@@ -1,28 +1,38 @@
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
 
-from app.scraper import weibo
-from app.util.csv_util import read_num, write_normal, rewrite_nums, write_comments
+import pandas as pd
+
+from app.scraper import weibo, bilibili
+from app.util.csv_util import write_helper
 
 
-def save_weibo(date: datetime, keywords: str):
-    res = weibo.search(date, keywords)
-    df = read_num("cur_num", "./store/")
-    nums = df.loc[0]
-    comment_name = "comments_" + str(date.date()) + "_" + str(nums[-1])
-    weibo_name = "weibo" + str(date.date()) + "_" + str(nums[0])
-    data = []
-    for cur in res:
-        topic = cur["topic"]
-        url = cur["url"]
-        data.append([topic, date.date(), comment_name, url])
-        comments = cur["comments"]
-        write_comments(comment_name, "./store/comment/", comments)
-        nums[-1] += 1
-        comment_name = "comments_" + str(date.date()) + "_" + str(nums[-1])
-    write_normal(weibo_name, "./store/informal/", data)
-    nums[0] += 1
-    rewrite_nums("cur_num", "./store/", nums)
+def raw():
+    bilibili.bilibili()
+
+
+def sort_raw_by_date():
+    dir_path = "./raw"
+    all_files = os.listdir(dir_path)
+    # df = pd.read_csv(os.path.join(dir_path, "1传33！大连本轮疫情出现超级传播.csv"), sep=',')
+    # begin = datetime.strptime(df.head(1)["日期"].values[0], "%Y-%m-%d").date()
+    # end = datetime.strptime(df.tail(1)["日期"].values[0], "%Y-%m-%d").date()
+    for cur_file in all_files:
+        df = pd.read_csv(os.path.join(dir_path, cur_file), sep=',')
+        begin = datetime.strptime(df.head(1)["日期"].values[0], "%Y-%m-%d").date()
+        end = datetime.strptime(df.tail(1)["日期"].values[0], "%Y-%m-%d").date()
+        while begin <= end:
+            cur_df = df[df["日期"] == str(begin)]
+            write_helper("./store/bilibili", "bilibili_" + str(begin) + ".csv", cur_df)
+            print(cur_df)
+            begin += timedelta(days=1)
+
+
+def store(begin: datetime, end: datetime, keywords: str):
+    weibo.run(begin, end, keywords)
+    sort_raw_by_date()
 
 
 if __name__ == '__main__':
-    save_weibo(datetime.now(), "新冠疫情")
+    print({str(datetime(2020, 2, 1).date()): 1})
+    store(datetime(2020, 5, 2), datetime(2020, 6, 1), "新冠疫情")
