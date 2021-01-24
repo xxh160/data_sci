@@ -32,9 +32,5 @@ def add_prefix(prefix: str, path: str):
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     add_postfix(".csv", "../scraper/store/bilibili/", )
-=======
-    # add_postfix(".csv", "../scraper/store/bilibilidate/", )
->>>>>>> tmp
     add_prefix("bilibili_", "../scraper/store/bilibili/")
