@@ -28,7 +28,7 @@
 - [`scraper`](doc/scraper.md)
 - [`pretreatment`](doc/pretreatement.md)
 - [`analysis`](doc/analysis.md)
-- [`predication`](doc/pretreatement.md)
+- [`predication`](doc/predication.md)
 
 ## 会议记录
 
