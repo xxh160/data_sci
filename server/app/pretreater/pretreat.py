@@ -36,7 +36,7 @@ def norm(datalist):  # 计算数据的均值和标准差
     return list
 
 
-def pretreatment(resoucedir, targetdir, begin_time, end_time):
+def pretreat(resoucedir, targetdir, begin_time, end_time):
     files = os.listdir(resoucedir)
     resfrom = ""
     if "bilibili" in resoucedir:
@@ -69,21 +69,28 @@ def pretreatment(resoucedir, targetdir, begin_time, end_time):
 
 
 if __name__ == "__main__":
-    pretreatment("../scraper/store/weibo/", "./store/weibo/",
-                 datetime.date(2019, 12, 31), datetime.date(2020, 1, 22))
-    pretreatment("../scraper/store/weibo/", "./store/weibo/",
-                 datetime.date(2020, 1, 23), datetime.date(2020, 2, 7))
-    pretreatment("../scraper/store/weibo/", "./store/weibo/",
-                 datetime.date(2020, 2, 8), datetime.date(2020, 3, 9))
-    pretreatment("../scraper/store/weibo/", "./store/weibo/",
-                 datetime.date(2020, 3, 10), datetime.date(2020, 6, 1))
-    pretreatment("../scraper/store/bilibili/", "./store/bilibili/",
-                 datetime.date(2020, 2, 9), datetime.date(2020, 3, 9))
-    pretreatment("../scraper/store/bilibili/", "./store/bilibili/",
-                 datetime.date(2020, 3, 10), datetime.date(2020, 6, 29))
-    # pretreater("../scraper/store/bilibili/", "./store/bilibili/",
-    #              datetime.date(2020, 6, 16), datetime.date(2020, 9, 30))
-    # pretreater("../scraper/store/bilibili/", "./store/bilibili/",
-    #              datetime.date(2020, 10, 1), datetime.date(2021, 1, 20))
-    # pretreater("../scraper/store/south/", "./store/south/",
-    #              datetime.date(2019, 12, 31), datetime.date(2020, 6, 15))
+    # weibo
+    pretreat("../scraper/store/weibo/", "./store/weibo/",
+             datetime.date(2019, 12, 31), datetime.date(2020, 1, 19))
+    pretreat("../scraper/store/weibo/", "./store/weibo/",
+             datetime.date(2020, 1, 20), datetime.date(2020, 2, 20))
+    pretreat("../scraper/store/weibo/", "./store/weibo/",
+             datetime.date(2020, 2, 21), datetime.date(2020, 3, 17))
+    pretreat("../scraper/store/weibo/", "./store/weibo/",
+             datetime.date(2020, 3, 18), datetime.date(2020, 4, 28))
+    pretreat("../scraper/store/weibo/", "./store/weibo/",
+             datetime.date(2020, 4, 29), datetime.date(2020, 6, 1))
+    # bilibili
+    # pretreat("../scraper/store/bilibili/", "./store/bilibili/",
+    #          datetime.date(2019, 12, 31), datetime.date(2020, 1, 19))
+    pretreat("../scraper/store/bilibili/", "./store/bilibili/",
+             datetime.date(2020, 1, 23), datetime.date(2020, 2, 20))
+    pretreat("../scraper/store/bilibili/", "./store/bilibili/",
+             datetime.date(2020, 2, 21), datetime.date(2020, 3, 17))
+    pretreat("../scraper/store/bilibili/", "./store/bilibili/",
+             datetime.date(2020, 3, 18), datetime.date(2020, 4, 28))
+    pretreat("../scraper/store/bilibili/", "./store/bilibili/",
+             datetime.date(2020, 4, 29), datetime.date(2020, 6, 1))
+    # south
+    pretreat("../scraper/store/south/", "./store/south/",
+             datetime.date(2019, 12, 31), datetime.date(2020, 6, 1))
