@@ -39,7 +39,7 @@ def norm(datalist):  # 计算数据的均值和标准差
 def pretreatment(resoucedir, targetdir, begin_time, end_time):
     files = os.listdir(resoucedir)
     resfrom = ""
-    if "bilibili" in resoucedir:
+    if "bilibilidate" in resoucedir:
         resfrom = "bilibili_"
     if "weibo" in resoucedir:
         resfrom = "weibo_"
@@ -77,13 +77,13 @@ if __name__ == "__main__":
                  datetime.date(2020, 2, 8), datetime.date(2020, 3, 9))
     pretreatment("../scraper/store/weibo/", "./store/weibo/",
                  datetime.date(2020, 3, 10), datetime.date(2020, 6, 1))
-    pretreatment("../scraper/store/bilibili/", "./store/bilibili/",
+    pretreatment("../scraper/store/bilibilidate/", "./store/bilibilidate/",
                  datetime.date(2020, 2, 9), datetime.date(2020, 3, 9))
-    pretreatment("../scraper/store/bilibili/", "./store/bilibili/",
+    pretreatment("../scraper/store/bilibilidate/", "./store/bilibilidate/",
                  datetime.date(2020, 3, 10), datetime.date(2020, 6, 29))
-    # pretreater("../scraper/store/bilibili/", "./store/bilibili/",
+    # pretreater("../scraper/store/bilibilidate/", "./store/bilibilidate/",
     #              datetime.date(2020, 6, 16), datetime.date(2020, 9, 30))
-    # pretreater("../scraper/store/bilibili/", "./store/bilibili/",
+    # pretreater("../scraper/store/bilibilidate/", "./store/bilibilidate/",
     #              datetime.date(2020, 10, 1), datetime.date(2021, 1, 20))
     # pretreater("../scraper/store/south/", "./store/south/",
     #              datetime.date(2019, 12, 31), datetime.date(2020, 6, 15))
