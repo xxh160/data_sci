@@ -6,8 +6,16 @@ import requests
 from bs4 import BeautifulSoup
 from lxml import etree
 
-cookie = "_uuid=CA977C90-B626-1ECF-C821-5EABBE41DB1419875infoc; buvid3=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; CURRENT_FNVAL=80; blackside_state=1; rpdid=|(J|)RuYmlYm0J'uY||)~~uRl; CURRENT_QUALITY=112; sid=c4nky8dy; bp_video_offset_351632898=482211311356370242; fingerprint3=112f165497aa270f7eba1c34ea8d8fd3; fingerprint_s=2689d6474fc87153e7dc59cd9a2c5f45; buvid_fp=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; buvid_fp_plain=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; PVID=5; fingerprint=664a68a4027fb32ab3b04d858af2b453; DedeUserID=478282563; DedeUserID__ckMd5=8322b1667e985120; SESSDATA=3a4e1c18%2C1626709917%2C713a4*11; bili_jct=628f17ef4964ebe5062d1189d26abf96"
-useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
+cookie = "_uuid=CA977C90-B626-1ECF-C821-5EABBE41DB1419875infoc; " \
+         "buvid3=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; CURRENT_FNVAL=80; blackside_state=1; rpdid=|(" \
+         "J|)RuYmlYm0J'uY||)~~uRl; CURRENT_QUALITY=112; sid=c4nky8dy; bp_video_offset_351632898=482211311356370242; " \
+         "fingerprint3=112f165497aa270f7eba1c34ea8d8fd3; fingerprint_s=2689d6474fc87153e7dc59cd9a2c5f45; " \
+         "buvid_fp=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; " \
+         "buvid_fp_plain=2BF98590-9B03-4B1C-8748-9DD76315A0D6143092infoc; PVID=5; " \
+         "fingerprint=664a68a4027fb32ab3b04d858af2b453; DedeUserID=478282563; DedeUserID__ckMd5=8322b1667e985120; " \
+         "SESSDATA=3a4e1c18%2C1626709917%2C713a4*11; bili_jct=628f17ef4964ebe5062d1189d26abf96 "
+useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) " \
+            "Chrome/87.0.4280.141 Safari/537.36 "
 headers = {
     "cookie": cookie,
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "

@@ -1,3 +1,3 @@
-git add .
-git commit -m "test"
-git push origin main
+git fetch origin main:tmp
+git merge tmp
+git branch -d tmp

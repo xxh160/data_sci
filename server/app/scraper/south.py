@@ -1,13 +1,11 @@
-import requests
-import urllib.request
-import re
 import datetime
 import time
-from pandas import DataFrame
-from bs4 import BeautifulSoup
-from distutils.filelist import findall
-from selenium import webdriver
+import urllib.request
 from _datetime import timedelta
+
+from bs4 import BeautifulSoup
+from pandas import DataFrame
+from selenium import webdriver
 
 
 def nanfang(url):
@@ -20,14 +18,14 @@ def nanfang(url):
         content = page.read()
         soup = BeautifulSoup(content, "html5lib")
         title = soup.find("h2", id="article_title")
-        if(title != None):
+        if (title != None):
             dict["topic"] = (title.get_text().strip())
         cont = soup.find("div", class_="content")
-        if(cont != None):
+        if (cont != None):
             texts = cont.find_all("p")
-            if(texts != None):
+            if (texts != None):
                 for text in texts:
-                    dict["content"] += "\n"+text.get_text()
+                    dict["content"] += "\n" + text.get_text()
     except:
         pass
     return dict
@@ -40,7 +38,7 @@ def go(url):
     list = []
     soup = BeautifulSoup(browser.page_source, "html5lib")
     tag = soup.find("div", class_="result-box")
-    if(tag != None):
+    if (tag != None):
         for target in tag.find_all("a"):
             list.append(nanfang(target.get("href")))
     else:
@@ -52,34 +50,34 @@ def go(url):
 def search(date, keyword):
     keyword = urllib.parse.quote(keyword)
     datestr = str(date.year)
-    if(date.month < 10):
-        datestr += ("-0"+str(date.month))
+    if (date.month < 10):
+        datestr += ("-0" + str(date.month))
     else:
-        datestr += ("-"+str(date.month))
-    if(date.day < 10):
-        datestr += ("-0"+str(date.day))
+        datestr += ("-" + str(date.month))
+    if (date.day < 10):
+        datestr += ("-0" + str(date.day))
     else:
-        datestr += ("-"+str(date.day))
+        datestr += ("-" + str(date.day))
     list = []
     page = "1"
     url = "http://www.southcn.com/search/pc/advresult.html?keyword=" + \
-        keyword+"&size=10&from="+datestr+"&to="+datestr+"&o=desc&page="
+          keyword + "&size=10&from=" + datestr + "&to=" + datestr + "&o=desc&page="
     end = "&category=%E5%8D%97%E6%96%B9%E7%BD%91pc%E7%AB%AF"
     browser = webdriver.Firefox()
-    browser.get(url+page+end)
+    browser.get(url + page + end)
     time.sleep(3)
     soup = BeautifulSoup(browser.page_source, "html5lib")
     maxNum = "0"
     for i in soup.find_all("a"):
-        if(i.get_text().isdigit()):
+        if (i.get_text().isdigit()):
             maxNum = i.get_text()
-        if("末页" in i.get_text()):
+        if ("末页" in i.get_text()):
             maxNum = i.get("data-page")
             break
     browser.close()
-    for i in range(1, 1+int(maxNum)):
+    for i in range(1, 1 + int(maxNum)):
         # for i in range(1, 2):
-        list += go(url+str(i)+end)
+        list += go(url + str(i) + end)
     dic = {"topic": [], "content": [], "url": []}
     for i in range(1, len(list)):
         dic["topic"].append(list[i]["topic"])
@@ -97,6 +95,6 @@ def run(begin_time, end_time, keywords):
         begin_time += timedelta(days=1)
 
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     run(datetime.date(2020, 6, 3), datetime.date(2020, 6, 15), "疫情")
     # print(search(datetime.date(2021,1,1),"疫情"))
