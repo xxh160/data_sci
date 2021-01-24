@@ -19,7 +19,7 @@ def sort_raw_by_date():
         end = datetime.strptime(df.tail(1)["日期"].values[0], "%Y-%m-%d").date()
         while begin <= end:
             cur_df = df[df["日期"] == str(begin)]
-            write_helper("./store/bilibili", "bilibili_" + str(begin) + ".csv", cur_df)
+            write_helper("./store/bilibilidate", "bilibili_" + str(begin) + ".csv", cur_df)
             print(cur_df)
             begin += timedelta(days=1)
 

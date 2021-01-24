@@ -28,17 +28,11 @@ class BarrageSpider:
         # 需要一个bv号，在接下来的代码中进行替换操作
         self.bv = bv
         self.video_name = None
-        # 不需要登录的弹幕接口地址 只能爬取部分弹幕
         self.barrage_url = 'https://comment.bilibili.com/{}.xml'
-        # 需要登陆的弹幕接口地址 根据日期进行分类 需要循环爬取 最后归总数据
         self.date_url = 'https://api.bilibili.com/x/v2/dm/history?type=1&oid={}&date={}'  # 2021-01-01
-        # 点击按钮弹出日历的数据接口，这里我们用来作索引
         self.index_url = 'https://api.bilibili.com/x/v2/dm/history/index?type=1&oid={}&month={}'  # 2021-01
-        # 在抓包工具中找的一个简洁的请求，里面有我们需要的oid或者是cid
         self.bv_url = 'https://api.bilibili.com/x/player/pagelist?bvid=' + bv + '&jsonp=jsonp'
-        # 视频时间获取
         self.video_url = 'https://www.bilibili.com/video/{}'.format(bv)
-        # 不需要登录接口的伪装头
         self.comment = {
             'referer': 'https://www.bilibili.com/',
             'user-agent': useragent
@@ -52,7 +46,6 @@ class BarrageSpider:
                           "Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66 "
         }
 
-    # 从接口返回的json中获取到我们的cid 注： cid = oid
     def get_cid(self):
         # 定位到数据data中下面的cid
         return requests.get(url=self.bv_url, headers=self.comment).json()['data'][0]['cid']
@@ -64,27 +57,6 @@ class BarrageSpider:
         self.video_name = video_page.xpath('//h1[@class="video-title"]/span/text()')[0]
         return v_time
 
-    # 解析不需要登录的接口 返回类型是xml文件
-    def parse_url(self):
-        # 获取指定视频的cid/oid
-        cid = self.get_cid()
-        # 对页面进行伪装请求，这里注意不要转换成text，使用二进制
-        response = requests.get(url=self.barrage_url.format(cid), headers=self.comment).content
-        # etree解析
-        data = etree.HTML(response)
-        # 定位到所有的d元素
-        barrage_list = data.xpath('//d')
-        for barrage in barrage_list:
-            # 获取d元素的p属性值
-            info = barrage.xpath('./@p')[0].split(',')
-            # 获取弹幕内容
-            content = barrage.xpath('./text()')[0]
-            item = {'出现时间': info[0], '弹幕模式': info[1], '字体大小': info[2], '颜色': info[3], '发送时间': info[4], '弹幕池': info[5],
-                    '用户ID': info[6], 'rowID': info[7], '内容': content}
-            # 因为这只是一部分弹幕 所以就没有进行持久化存储 没有必要
-            print(item)
-
-    # 循环爬取所有弹幕 需要传入month的数据 根据视频发布的日期到现在的所有月份
     def parse_date_url(self, month):
         print('正在爬取{}的数据'.format(self.video_name + month + "月"))
         # 存放爬到的数据
@@ -108,12 +80,8 @@ class BarrageSpider:
                 # 循环解析数据
 
                 for barrage in barrage_list:
-                    # 获取d元素的p属性值
-                    # things= barrage.xpath('./@p')[0].split(',')
-                    # 获取弹幕内容 并去掉所有空格
                     content = barrage.xpath('./text()')[0].replace(" ", "")
                     item = {'日期': day, '内容': content}
-                    # item.get(day).append(content)
                     result.append(item)
         # 返回封装好的数据
         return result
@@ -121,7 +89,6 @@ class BarrageSpider:
     # 根据现在的时间遍历所有的月份信息
     def parse_month(self):
         start_day = datetime.datetime.strptime(self.get_video_time(), '%Y-%m-%d')
-        # end_day=start_day+relativedelta(months=+1)
         end_day = datetime.date.today()
         months = (end_day.year - start_day.year) * 12 + end_day.month - start_day.month
         m_list = []
@@ -131,13 +98,6 @@ class BarrageSpider:
             else:
                 m_list.append('{}-{}'.format(start_day.year + mon // 12, mon % 12 + 1))
         return m_list
-
-    # 舍友指导下的一行代码生成词云 编译器自动格式化了 本质还是一行代码
-    # def wordCloud(self):
-    #     WordCloud(font_path="C:/Windows/Fonts/simfang.ttf", background_color='white', scale=16).generate(" ".join(
-    #         [c for c in jieba.cut("".join(str((pd.read_csv('{}弹幕池数据集.csv'.format(self.video_name))['内容']).tolist()))) if
-    #          len(c) > 1])).to_file(
-    #         "{}词云.png".format(self.video_name))
 
 
 def bilibili():
