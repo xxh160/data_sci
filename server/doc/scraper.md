@@ -30,7 +30,21 @@ bilibili的文件首先存储于[raw](../app/scraper/raw)文件夹下。
 
 文件名为`south_<date>.csv`。
 
-文件格式见实例。
+文件格式，以时间为分类标准，每个文件内只需要正文，例如：
+
+```text
+------
+south_<date_1>.csv
+---
+<content_1>
+<content_2>
+------
+south_<date_2>.csv
+---
+<content_3>
+<content_4>
+------
+```
 
 ## 其它
 
