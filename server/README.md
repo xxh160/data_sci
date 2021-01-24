@@ -7,9 +7,9 @@
 后端分为四大部分：
 
 - `scraper`即数据获取模块；
-- `pretreatment`即数据预处理模块；
-- `analysis`即数据分析模块。
-- `predication`即预测模块。
+- `pretreater`即数据预处理模块；
+- `analysor`即数据分析模块。
+- `predicator`即预测模块。
 
 数据获取模块异步获取数据，放入其`store`文件夹下。
 
@@ -26,9 +26,9 @@
 ## doc
 
 - [`scraper`](doc/scraper.md)
-- [`pretreatment`](doc/pretreatement.md)
-- [`analysis`](doc/analysis.md)
-- [`predication`](doc/predication.md)
+- [`pretreater`](doc/pretreater.md)
+- [`analysor`](doc/analysor.md)
+- [`predicator`](doc/predicator.md)
 
 ## 会议记录
 
