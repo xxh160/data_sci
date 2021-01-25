@@ -389,6 +389,3 @@ def bilibiliall():
 - `analyszer`：袁军平
 - `sentiment_classifier`：侯为栋
 
-## 意见及想说的话
-
-`nmsl`
