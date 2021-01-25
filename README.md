@@ -13,119 +13,59 @@
 
 ## 项目整体架构
 
-数据科学大作业后端。
+主体代码架构
 
 ```
-├── README.md
-├── app
-│   ├── __init__.py
-│   ├── analyzer
-│   │   ├── __init__.py
-│   │   ├── mindset.py
-│   │   ├── visible
-│   │   │   ├── TFIDFview.py
-│   │   │   └── mindchange.py
-│   │   ├── word_cloud
-│   │   │   ├── __init__.py
-│   │   │   └── ciyun.py
-│   │   └── word_frequency
-│   │       ├── Mindset.py
-│   │       ├── TFIDF.py
-│   │       ├── __init__.py
-│   │       ├── analysis.py
-│   │       ├── bilibiliGP.py
-│   │       └── date.py
-│   ├── sentiment_classifier
-│   │   ├── __init__.py
-│   │   ├── lan_lib
-│   │   │   ├── neg
-│   │   │   │   └── 2.txt
-│   │   │   └── pos
-│   │   │       └── 1.txt
-│   │   ├── outer
-│   │   │   ├── neg
-│   │   │   │   ├── neg.0.txt
-|   |   |   |   ├── ...
-│   │   │   └── pos
-│   │   │       ├── pos.0.txt
-│   │   │       ├── ...
-│   │   ├── predicate.py
-│   │   ├── pyhanlp_predication
-│   │   │   ├── __init__.py
-│   │   │   ├── model.ser
-│   │   │   └── predict.py
-│   │   ├── snownlp_predication
-│   │   │   ├── __init__.py
-│   │   │   └── predict.py
-│   │   └── store
-│   │       ├── bilibili
-│   │       │   ├── bilibili_总体走势.csv
-│   │       │   ├── ...
-│   │       │   └── img
-│   │       │       ├── bilibili_总体走势.png
-│   │       │       ├── ...
-│   │       └── weibo
-│   │           ├── img
-│   │           │   ├── weibo_总体走势.png
-│   │           │   ├── ...
-│   │           ├── weibo_总体走势.csv
-│   │           ├── ...
-│   ├── preprocessor
-│   │   ├── __init__.py
-│   │   ├── preprocess.py
-│   │   └── store
-│   │       ├── bilibili
-│   │       │   ├── bilibili_2020-01-26.csv
-│   │       │   └── ...
-│   │       ├── south
-│   │       │   ├── south_2020-03-25.csv
-│   │       │   ├── ...
-│   │       └── weibo
-│   │           ├── weibo_2020-01-24.csv
-│   │           ├── ...
-│   ├── scraper
-│   │   ├── __init__.py
-│   │   ├── bilibili.py
-│   │   ├── people.py
-│   │   ├── raw
-│   │   │   ├── 1传33！大连本轮疫情出现超级传播.csv
-│   │   │   ├── ...
-│   │   ├── scrape.py
-│   │   ├── south.py
-│   │   ├── store
-│   │   │   ├── bilibili
-│   │   │   │   ├── bilibili_2020-01-29.csv
-│   │   │   │   ├── ...
-│   │   │   ├── south
-│   │   │   │   ├── south_2019-12-31.csv
-|   |   |   |   ├── ...
-│   │   │   └── weibo
-│   │   │       ├── weibo_2019-12-31.csv
-│   │   │       ├── ...
-│   │   └── weibo.py
-│   └── util
-│       ├── __init__.py
-│       ├── csv_util.py
-│       ├── news_util.py
-│       ├── str_util.py
-│       └── yaml_util.py
-├── config.py
-├── doc
-│   ├── analyzer.md
-│   ├── minutes
-│   │   └── 2020-1-20.md
-│   ├── sentiment_classifier.md
-│   ├── preprocessor.md
-│   └── scraper.md
-├── manage.py
-├── resource
-│   ├── __init__.py
-│   └── log_config.yml
-└── test
-    └── __init__.py
+server
+├─ README.md
+├─ app
+│    ├─ __init__.py
+│    ├─ analyzer
+│    │    ├─ __init__.py
+│    │    ├─ mindset.py
+│    │    ├─ visible
+│    │    ├─ word_cloud
+│    │    └─ word_frequency
+│    ├─ preprocessor
+│    │    ├─ __init__.py
+│    │    ├─ preprocess.py
+│    │    └─ store
+│    ├─ scraper
+│    │    ├─ __init__.py
+│    │    ├─ bilibili.py
+│    │    ├─ people.py
+│    │    ├─ raw
+│    │    ├─ scrape.py
+│    │    ├─ south.py
+│    │    ├─ store
+│    │    └─ weibo.py
+│    ├─ sentiment_classifier
+│    │    ├─ __init__.py
+│    │    ├─ lan_lib
+│    │    ├─ model.ser
+│    │    ├─ outer
+│    │    ├─ predicate.py
+│    │    ├─ pyhanlp_predication
+│    │    ├─ snownlp_predication
+│    │    └─ store
+│    └─ util
+│           ├─ __init__.py
+│           ├─ csv_util.py
+│           ├─ news_util.py
+│           ├─ str_util.py
+│           └─ yaml_util.py
+├─ config.py
+├─ doc
+│    ├─ analyzer.md
+│    ├─ minutes
+│    │    └─ 2020-1-20.md
+│    ├─ preprocessor.md
+│    ├─ scraper.md
+│    └─ sentiment_classifier.md
+├─ manage.py
+└─ test
+       └─ __init__.py
 ```
-
-项目整体为`Flask`应用程序框架，方便做前后端扩展，但受限于事件，前端我们只搭了一个架子，没有正式开始前后端交互工作。
 
 `app`包下共有4个子模块，分别是：
 
