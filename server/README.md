@@ -26,9 +26,9 @@
 ## doc
 
 - [`scraper`](doc/scraper.md)
-- [`pretreater`](doc/pretreater.md)
-- [`analysor`](doc/analysor.md)
-- [`predicator`](doc/predicator.md)
+- [`preprocesspr`](doc/preprocessor.md)
+- [`analyzer`](doc/analyzer.md)
+- [`sentiment_classifier`](doc/sentiment_classifier.md)
 
 ## 会议记录
 

@@ -88,7 +88,7 @@
 │   │   ├── bilibili.py
 │   │   ├── people.py
 │   │   ├── raw
-│   │   │   ├── 1传33！大连本轮疫情出现超级传播.csv
+│   │   │   ├── 
 │   │   │   ├── ...
 │   │   ├── scrape.py
 │   │   ├── south.py
@@ -165,6 +165,158 @@
 本部分将结合具体案例进行详细讲解。
 
 ### 心态分析
+
+心态分析的基本思路是，b站爬取的原始疫情相关弹幕数据集经过预处理后，作为实验数据集。对实验数据集的近一百个视频 200万条弹幕进行TF-IDF高频词计算
+
+实验数据集csv文件格式为：弹幕时间 ：弹幕内容
+
+考虑到分析过程中我们需要对每天的弹幕进行分析，我们构建了date（）函数将弹幕按照时间分类,生成的文件为txt文件，标题为日期，内容为当天的弹幕 日期为2020年1月23日至2020年6月30日
+
+~~~python
+#将弹幕按照时间分类
+def date():
+    r='20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+    startday=datetime.date(2019,12,8)
+    endday=datetime.date(2020,6,30)
+    dic=dict()
+    basepath = '/Users/yuanjunping/PycharmProjects/datascience/bilibili'
+    for i in os.listdir(basepath):
+        if i == '.DS_Store':
+            continue
+        csvpath = basepath + '/' + i
+        print(csvpath)
+        datas = pd.read_csv(csvpath)
+        for j in datas.values:
+            if(re.match(r,j[0])==False):
+                continue
+            d=[int(i) for i in str(j[0]).split('-')]
+            CommentDate=datetime.date(d[0],d[1],d[2])
+            if(CommentDate.__le__(startday) or CommentDate.__ge__(endday)):
+                continue
+            if(dic.keys().__contains__(j[0])==False):
+                dic[j[0]] = []
+            k=dic[j[0]]
+            dic[j[0]].append(j[1])
+    targetpath='/Users/yuanjunping/PycharmProjects/datascience/bilibilidate'
+    for i in dic:
+            f=open(targetpath+'/'+str(i),'w')
+            for j in dic[i]:
+                f.write(str(j)+'\n')
+            f.close()
+~~~
+
+随后我们计算了每篇文章中各个词语出现的频率，方便计算词语的TF-IDF值,在TF-IDF.py文件中,我们构建了GetCP函数，通过jieba分词已经counter计数器对每个视频下的弹幕进行分词并统计词频，将每个视频词频前100的词已经对应评率存于videocp目录下的各个csv文件中，TFIDF函数读取以上文件，计算每个词语出现的频率以及出现的文章数,考虑到我们的样本数据量足够大，我们剔除了词频小于30的词语。最终得到共计1764个词语→tfidf的映射关系存于tfidf.csv文件中，我们选取了其中前15个最重要的词语做出如下图片：
+
+![image-20210125152329953](/Users/yuanjunping/Library/Application Support/typora-user-images/image-20210125152329953.png)
+
+我们对tfidf.csv文件中的词语进行情绪词筛选，最终构建心态词典如下：
+
+~~~python
+# 对国家的关心 支持 自豪 以及希望 祝愿等等
+class mset:
+    list1=[
+        '武汉','中国','加油','无衣','与子','同袍','祖国','辛苦','英雄','无悔'
+           ,'支持','骄傲','华夏','伟大','种花','感动','援助','感谢','致敬','泪目','复兴','砥砺',
+        '前行','中华民族','此生' '自豪','崛起','初心','哭','国土无双' ,'钟老'  ,'国家'    ]
+
+    # 调侃 开心 玩梗 等等
+    list2=[
+        '飞飞','哈哈','一定','下次','战忽局','泪目','公屏','保护','狗头',''
+    '   可爱','内味', '爽哥','汪汪','口区' ,'哈哈'
+    ]
+    #对大陆以外地区的嘲讽，不喜欢，对国内一些人的厌恶，等等
+    list3=[
+            '制度','反华','罪犯','难民','道歉','日军','强盗','警察','抗日','选票','谎言','造谣','米国','妖婆','总统'
+           ,'风景线','公知','讥笑','美帝','方方','敌人','BBC','建国','川普','美国','澳大利亚','日本','西方','红领巾','法国','德国','欧洲',
+           '台湾','墙头草','阴阳人','政治','欧盟','自由','民主','言论','英国','政客','二战','殖民','道歉','阴阳怪气'
+           ]
+    #对疫情的担心 忧虑，恐惧等等
+    list4=[
+        '病毒','疫情','疫苗','玩忽职守','警惕','空气','新冠','危险','口罩','封城','老人','确诊',''
+        '经济','罪犯','战役','隔离','恐惧' ,'流感','恐怖','末日','突变','失业',
+    ]
+    def getmset(self):
+        return [self.list1,self.list2,self.list3,self.list4]
+~~~
+
+对于疫情中大众心态变化的计算，我们选择了以下方法：
+
+十四天为一个单位量,将该时间段内的弹幕分词,计算四类心情词语出现的频率，函数为anaylys.py里的analys()
+
+我们从两个角度分析结果
+
+ 1.对各种心态加权，令各种心态平均强度相同，观察各种心态随时间的变化
+
+2. 不加权，让各种心态显示其频率的绝对值，纵向对比各种心态的强度
+
+#### 加权后(乘系数令各种心态平均强度相同)画出心情曲线图如下：
+
+![image-20210125153232518](/Users/yuanjunping/Library/Application Support/typora-user-images/image-20210125153232518.png)
+
+对上图进行分析得出以下结论：
+
+	##### 1.  对于国家的支持以及医护人员的关心心态随时间的变化
+
+​	在疫情刚出现时,大众对于国家的支持之语，对医护人员的关心，等等心态不断上升，在二月中旬达到峰值，之后疫情逐渐稳定，这种心态强度逐渐下降,稳定在一个值
+
+##### 2.b站网友调侃开心玩梗的心态的随时间的变化
+
+​	我们可以看到，在疫情初期，由于对疫情的关心等，网友调侃玩梗的心态强度逐渐下降，在疫情稳定后逐渐回升，最终稳定在一个值。
+
+##### 3.大众对于其他国家的讨论，以及对于公知等的厌恶等等心态的随时间的变化
+
+​	疫情初期，大众多关注于祖国的疫情状况，随后疫情在国外爆发，国内疫情稳定，大众讨论国外疫情，对国外的一些情况的厌恶以及不喜欢强度逐渐上升，以及对于国内疫情爆发时一些公知的言论的厌恶程度上升，最终稳定。
+
+##### 4.大众担忧害怕的心态随时间的变化
+
+​	可以看到在疫情初期，大众害怕的心态强度为峰值，后整体呈下降趋势，逐渐稳定。
+
+##### 5.四种心态都最终稳定的原因：
+
+​	我们认为是由于随着疫情状况的稳定,大众对于疫情相关资讯的情绪状况逐渐稳定，对于疫情中的各种状况有了很高的心理承受能力，心态波动变化比较小。
+
+#### 不加权，各种心态的绝对强度图如下：
+
+![image-20210125155936624](/Users/yuanjunping/Library/Application Support/typora-user-images/image-20210125155936624.png)	
+
+对上图分析得出结论：
+
+##### 1.大众各种心态强度对比
+
+可以看出，b站网友总体比较乐观，在疫情初期，对国家防疫的支持心态占据大众心态的绝对优势，随着时间推移，b站网友喜欢的玩梗以及调侃等等心态占据了优势，我们认为这是疫情常态化的结果，在疫情相关的视频下，网友们也回归常态。值得注意的是，担心，害怕这种情绪的绝对强度始终处于一个较低水平，这也说明了大众对于国家一定能够战胜疫情的信心，以及对国家防疫政策的支持。
+
+#### 高频词词云生成：
+
+我们去除了百度停词表中的停词,对所有弹幕生成了一个词云，以及对疫情最严重的时期的一月以及二月这个阶段生成了一个词云
+
+词云生成代码如下：
+
+~~~		python
+# encoding: utf-8
+def bilibiliall():
+    stopwords=open('/Users/yuanjunping/PycharmProjects/datascience/百度停词表.txt').readlines()
+    stopwords=set(stopwords)
+    bilibiliallpath='/Users/yuanjunping/PycharmProjects/datascience/results/bilibiliAll.txt'
+    mask = np.array(image.open('/Users/yuanjunping/PycharmProjects/datascience/mask.jpg'))
+    w=wordcloud.WordCloud(font_path='/System/Library/Fonts/PingFang.ttc',max_font_size=40,mask=mask
+                       ,stopwords=stopwords,
+                       max_words=100   )
+    s=open(bilibiliallpath).read()
+    s=s.decode('utf-8')
+    w.generate(s)
+    w.to_file("b站词云.png")
+
+~~~
+
+所有弹幕词云结果图：
+
+![image-20210125163523550](/Users/yuanjunping/Library/Application Support/typora-user-images/image-20210125163523550.png)
+
+疫情最严重时期词云结果图：
+
+![image-20210125163556436](/Users/yuanjunping/Library/Application Support/typora-user-images/image-20210125163556436.png)
+
+可以看出无论是在疫情最严重时，还是总体情况，大众说的最多的就是中国加油,武汉加油一类的词语，真切的表现了大家对于国家的关心。此外，b站网友特有的下次一定让人莞尔，保护，泪目一类的词语也是弹幕的一大特色。
 
 ### 情绪分析
 
