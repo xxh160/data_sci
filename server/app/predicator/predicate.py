@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
-from app.predicator.pyhanlp_predication.predict import Predict
+from app.predicator.pyhanlp_predication.han import Han
 
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
@@ -50,7 +50,7 @@ def load_from_file(path: str, name: str) -> dict:
     return {'x': x, 'y': y}
 
 
-def paint_emotion(cur_stage: dict, src_path: str, target: str, predicator: Predict, re: bool,
+def paint_emotion(cur_stage: dict, src_path: str, target: str, predicator: Han, re: bool,
                   y_description: str) -> str:
     stage_description = list(cur_stage.items())[0][0]
     file_res = load_from_file(".\\store\\" + target, target + "_" + stage_description + ".csv")
@@ -125,10 +125,13 @@ def curve(x: list, y: list, full_path: str):
 
 
 if __name__ == '__main__':
-    for i in range(1, 6):
-        print(paint_emotion(stages[i], "..\\scraper\\store\\bilibili", "bilibili",
-                            Predict("outer", ".\\pyhanlp_predication"), True, "积极评论比例"))
+    pre = Han("lan_lib", ".\\pyhanlp_predication")
+    pre.retrain("lan_lib")
+    for i in range(5, 6):
         print(paint_emotion(stages[i], "..\\scraper\\store\\weibo", "weibo",
-                            Predict("outer", ".\\pyhanlp_predication"), True, "积极评论比例"))
+                            pre, True, "积极评论比例"))
+        # print(paint_emotion(stages[i], "..\\scraper\\store\\bilibili", "bilibili",
+        #                     pre, True, "积极评论比例"))
+
     # print(os.listdir("/"))
     # load_from_file(".\\store\\weibo", "weibo_第二阶段：初步遏制疫情蔓延势头.csv")
